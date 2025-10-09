@@ -1076,6 +1076,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0E0E0E',
+    overflow: 'hidden',
   },
   header: {
     paddingTop: 48,
@@ -1121,9 +1122,17 @@ const styles = StyleSheet.create({
     height: '56%',
     minHeight: 320,
     position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#000',
   },
   map: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
   fabContainer: {
     position: 'absolute',
