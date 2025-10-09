@@ -47,6 +47,7 @@ export default function NavigateScreen() {
   const [toastMessage, setToastMessage] = useState<string>('');
   const [showCollectionModal, setShowCollectionModal] = useState<boolean>(false);
   const [alignmentState, setAlignmentState] = useState<'aligned' | 'adjust' | 'off' | 'waiting'>('waiting');
+  const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
   const precisionDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const arrivalTimeRef = useRef<number | null>(null);
@@ -553,6 +554,10 @@ export default function NavigateScreen() {
     ]);
   };
 
+  const handleToggleMapType = () => {
+    setMapType(prevType => prevType === 'standard' ? 'satellite' : 'standard');
+  };
+
   if (isWeb) {
     return (
       <View style={styles.container}>
@@ -732,6 +737,7 @@ export default function NavigateScreen() {
           ref={mapRef}
           style={styles.map}
           initialRegion={initialRegion}
+          mapType={mapType}
           showsUserLocation={true}
           showsMyLocationButton={false}
           followsUserLocation={false}
@@ -763,6 +769,14 @@ export default function NavigateScreen() {
             disabled={!destino}
           >
             <Text style={[styles.fabText, !destino && styles.fabTextDisabled]}>⊡</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.fab, styles.mapTypeFab]} 
+            onPress={handleToggleMapType}
+          >
+            <Text style={styles.fabText}>
+              {mapType === 'standard' ? '🛰️' : '🗺️'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -1140,6 +1154,9 @@ const styles = StyleSheet.create({
   },
   fabTextDisabled: {
     color: '#666',
+  },
+  mapTypeFab: {
+    backgroundColor: '#FF9500',
   },
   bottomPanel: {
     height: '44%',
