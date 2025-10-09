@@ -1076,7 +1076,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0E0E0E',
-    overflow: 'hidden',
   },
   header: {
     paddingTop: 48,
@@ -1119,11 +1118,15 @@ const styles = StyleSheet.create({
     borderColor: '#f1c40f',
   },
   mapZone: {
+    position: 'absolute',
+    top: 140,
+    left: 0,
+    right: 0,
     height: '56%',
     minHeight: 320,
-    position: 'relative',
     overflow: 'hidden',
     backgroundColor: '#000',
+    zIndex: 1,
   },
   map: {
     position: 'absolute',
@@ -1168,7 +1171,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF9500',
   },
   bottomPanel: {
-    height: '44%',
+    position: 'absolute',
+    top: '65%',
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#121212',
   },
   bottomPanelContent: {
