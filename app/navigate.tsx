@@ -1142,11 +1142,12 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   bottomPanel: {
-    flex: 1,
+    height: '44%',
     backgroundColor: '#121212',
   },
   bottomPanelContent: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   footer: {
     backgroundColor: '#141414',
