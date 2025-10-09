@@ -48,6 +48,7 @@ export default function NavigateScreen() {
   const [showCollectionModal, setShowCollectionModal] = useState<boolean>(false);
   const [alignmentState, setAlignmentState] = useState<'aligned' | 'adjust' | 'off' | 'waiting'>('waiting');
   const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
+  const [isMapInteracting, setIsMapInteracting] = useState<boolean>(false);
   const precisionDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const arrivalTimeRef = useRef<number | null>(null);
@@ -1118,24 +1119,18 @@ const styles = StyleSheet.create({
     borderColor: '#f1c40f',
   },
   mapZone: {
-    position: 'absolute',
-    top: 140,
-    left: 0,
-    right: 0,
-    height: '56%',
-    minHeight: 320,
-    overflow: 'hidden',
+    height: 280,
+    marginHorizontal: 20,
+    marginTop: 16,
     backgroundColor: '#000',
-    zIndex: 1,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#888888',
+    overflow: 'hidden',
   },
   map: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    borderRadius: 10,
   },
   fabContainer: {
     position: 'absolute',
@@ -1171,11 +1166,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF9500',
   },
   bottomPanel: {
-    position: 'absolute',
-    top: '65%',
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: '#121212',
   },
   bottomPanelContent: {
