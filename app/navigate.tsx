@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/store';
 import { bearingBetween, deltaHeading, haversineMeters, formatDistance } from '@/lib/geo';
 import * as Location from 'expo-location';
 import * as Haptics from 'expo-haptics';
-import MapView, { Marker, Polyline, Region } from 'react-native-maps';
+import MapView, { Marker, Polyline, Region } from '@/lib/MapView';
 
 type GpsStatus = 'aguardando' | 'permitido' | 'negado';
 type PrecisionStatus = 'green' | 'yellow' | 'red' | 'gray';
