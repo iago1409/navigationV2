@@ -11,36 +11,37 @@ const { width, height } = Dimensions.get('window');
 const NUM_PARTICLES = 15;
 
 function Particle({ delay, startX }: { delay: number; startX: number }) {
-  const translateY = useRef(new Animated.Value(height + 50)).current;
+  const translateY = useRef(new Animated.Value(-50)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const size = useRef(4 + Math.random() * 8).current;
 
   useEffect(() => {
     const animate = () => {
-      translateY.setValue(height + 50);
+      translateY.setValue(-50);
       opacity.setValue(0);
 
       Animated.sequence([
         Animated.delay(delay),
         Animated.parallel([
           Animated.timing(translateY, {
-            toValue: -50,
-            duration: 4000 + Math.random() * 3000,
+            toValue: height + 50,
+            duration: 5000 + Math.random() * 4000,
             useNativeDriver: true,
           }),
           Animated.sequence([
             Animated.timing(opacity, {
-              toValue: 1,
-              duration: 300,
+              toValue: 0.7,
+              duration: 400,
               useNativeDriver: true,
             }),
             Animated.timing(opacity, {
-              toValue: 0.8,
-              duration: 3500,
+              toValue: 0.5,
+              duration: 4000,
               useNativeDriver: true,
             }),
             Animated.timing(opacity, {
               toValue: 0,
-              duration: 300,
+              duration: 400,
               useNativeDriver: true,
             }),
           ]),
@@ -50,17 +51,15 @@ function Particle({ delay, startX }: { delay: number; startX: number }) {
     animate();
   }, []);
 
-  const size = 2 + Math.random() * 3;
-
   return (
     <Animated.View
       style={{
         position: 'absolute',
         left: startX,
         width: size,
-        height: size * 12,
-        borderRadius: size,
-        backgroundColor: '#22c55e',
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: '#4ade80',
         opacity,
         transform: [{ translateY }],
       }}
@@ -199,7 +198,8 @@ export default function ImportScreen() {
 
   return (
     <LinearGradient
-      colors={['#0a0a0f', '#0d0d12', '#111116']}
+      colors={['#0a0a0a', '#0d1a10', '#0f2818', '#0a0a0a']}
+      locations={[0, 0.4, 0.7, 1]}
       style={styles.gradient}
     >
       <ParticlesBackground />
