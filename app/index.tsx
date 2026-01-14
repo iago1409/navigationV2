@@ -218,6 +218,29 @@ export default function ImportScreen() {
             <Text style={styles.subtitle}>Sistema de Navegação Inteligente</Text>
           </View>
 
+          <View style={styles.inputSection}>
+            <View style={styles.inputHeader}>
+              <FileJson size={20} color="#a78bfa" />
+              <Text style={styles.inputLabel}>Cole seu JSON aqui</Text>
+            </View>
+            <View style={styles.textAreaWrapper}>
+              <TextInput
+                style={styles.textArea}
+                multiline
+                numberOfLines={6}
+                value={jsonInput}
+                onChangeText={setJsonInput}
+                placeholder='[{"numPonto": 1, "lat": -23.5505, "lng": -46.6333}]'
+                placeholderTextColor="#4a4a5a"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(167, 139, 250, 0.1)']}
+                style={styles.inputGlow}
+                pointerEvents="none"
+              />
+            </View>
+          </View>
+
           <Animated.View style={[styles.card, styles.infoCard, { transform: [{ scale: scaleAnim }] }]}>
             <View style={styles.cardHeader}>
               <View style={styles.cardIconWrapper}>
@@ -240,29 +263,6 @@ export default function ImportScreen() {
               </View>
             </View>
           </Animated.View>
-
-          <View style={styles.inputSection}>
-            <View style={styles.inputHeader}>
-              <FileJson size={20} color="#a78bfa" />
-              <Text style={styles.inputLabel}>Cole seu JSON aqui</Text>
-            </View>
-            <View style={styles.textAreaWrapper}>
-              <TextInput
-                style={styles.textArea}
-                multiline
-                numberOfLines={8}
-                value={jsonInput}
-                onChangeText={setJsonInput}
-                placeholder='[{"numPonto": 1, "lat": -23.5505, "lng": -46.6333}]'
-                placeholderTextColor="#4a4a5a"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(167, 139, 250, 0.1)']}
-                style={styles.inputGlow}
-                pointerEvents="none"
-              />
-            </View>
-          </View>
 
           {errors.length > 0 && (
             <Animated.View style={[styles.card, styles.errorCard]}>

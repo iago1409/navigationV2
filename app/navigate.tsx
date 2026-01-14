@@ -706,104 +706,105 @@ export default function NavigateScreen() {
 
   if (gpsStatus === 'aguardando') {
     return (
-      <View style={styles.container}>
-        <Text style={styles.statusText}>Obtendo permissão de GPS…</Text>
-      </View>
+      <LinearGradient colors={['#0a0a0a', '#0d1a10', '#0f2818']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#22c55e" />
+          <Text style={styles.loadingText}>Obtendo permissão de GPS...</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   if (gpsStatus === 'negado') {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Permissão de localização negada.</Text>
-      </View>
+      <LinearGradient colors={['#0a0a0a', '#1a0d0d', '#280f0f']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <XCircle size={48} color="#ef4444" />
+          <Text style={styles.errorText}>Permissão de localização negada</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   if (!posAtual) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.statusText}>Localização ainda não disponível.</Text>
-      </View>
+      <LinearGradient colors={['#0a0a0a', '#0d1a10', '#0f2818']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#22c55e" />
+          <Text style={styles.loadingText}>Obtendo localização...</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   if (pontos.length === 0) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.statusText}>Nenhum ponto carregado.</Text>
-      </View>
+      <LinearGradient colors={['#0a0a0a', '#0d1a10', '#0f2818']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <MapPin size={48} color="#71717a" />
+          <Text style={styles.loadingText}>Nenhum ponto carregado</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   if (!initialRegion) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.statusText}>Aguardando coordenadas…</Text>
-      </View>
+      <LinearGradient colors={['#0a0a0a', '#0d1a10', '#0f2818']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#22c55e" />
+          <Text style={styles.loadingText}>Aguardando coordenadas...</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={['#0a0a0a', '#0d1a10', '#0f2818']} style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Navegação GPS</Text>
-        <View style={styles.badgeContainer}>
-          {!rotaConcluida && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                Ponto {indiceAtual + 1} de {pontos.length}
-              </Text>
-            </View>
-          )}
-          {rotaConcluida && (
-            <View style={[styles.badge, styles.badgeCompleted]}>
-              <Text style={styles.badgeCompletedText}>Rota concluída!</Text>
-            </View>
-          )}
-          <View style={[styles.badge, styles.collectedBadge]}>
-            <Text style={styles.badgeText}>
-              Coletados: {coletasConcluidas.length} / {pontos.length}
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
+            <ArrowLeft size={20} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Navigation size={20} color="#22c55e" />
+            <Text style={styles.headerTitle}>Navegação</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.precisionIndicator}
+            onPress={() => setShowPrecisionTooltip(!showPrecisionTooltip)}
+          >
+            <View
+              style={[
+                styles.precisionDot,
+                precisionStatus === 'green' && styles.precisionDotGreen,
+                precisionStatus === 'yellow' && styles.precisionDotYellow,
+                precisionStatus === 'red' && styles.precisionDotRed,
+                precisionStatus === 'gray' && styles.precisionDotGray,
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statusRow}>
+          <View style={styles.statusChip}>
+            <Target size={12} color="#22c55e" />
+            <Text style={styles.statusChipText}>
+              {rotaConcluida ? 'Concluída' : `${indiceAtual + 1}/${pontos.length}`}
             </Text>
           </View>
-          <View style={[styles.badge, styles.modeBadge]}>
-            <Text style={styles.badgeText}>Modo: {mode}</Text>
+          <View style={styles.statusChip}>
+            <CheckCircle2 size={12} color="#f59e0b" />
+            <Text style={styles.statusChipText}>{coletasConcluidas.length} coletados</Text>
           </View>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
-              GPS: {gpsStatus === 'permitido' ? 'Ativo' : gpsStatus === 'aguardando' ? 'Aguardando' : 'Negado'}
-            </Text>
+          <View style={styles.statusChip}>
+            <Compass size={12} color="#3b82f6" />
+            <Text style={styles.statusChipText}>{mode}</Text>
           </View>
-          {!isWeb && (
-            <TouchableOpacity
-              style={styles.precisionBadge}
-              onPress={() => setShowPrecisionTooltip(!showPrecisionTooltip)}
-              accessibilityLabel={`Precisão do GPS: ${
-                precisionStatus === 'green'
-                  ? 'alta'
-                  : precisionStatus === 'yellow'
-                  ? 'moderada'
-                  : precisionStatus === 'red'
-                  ? 'baixa'
-                  : 'indisponível'
-              }`}
-            >
-              <View
-                style={[
-                  styles.precisionDot,
-                  precisionStatus === 'green' && styles.precisionDotGreen,
-                  precisionStatus === 'yellow' && styles.precisionDotYellow,
-                  precisionStatus === 'red' && styles.precisionDotRed,
-                  precisionStatus === 'gray' && styles.precisionDotGray,
-                ]}
-              />
-              <Text style={styles.precisionLabel}>Precisão</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
 
-      {showPrecisionTooltip && !isWeb && (
+      {showPrecisionTooltip && (
         <TouchableOpacity
           style={styles.tooltipOverlay}
           activeOpacity={1}
@@ -812,13 +813,13 @@ export default function NavigateScreen() {
           <View style={styles.tooltipContainer}>
             <Text style={styles.tooltipTitle}>Precisão do GPS</Text>
             <Text style={styles.tooltipText}>
-              {precisionStatus === 'green' && '🟢 Precisão alta (< 5 m)'}
-              {precisionStatus === 'yellow' && '🟡 Precisão moderada (5–15 m)'}
-              {precisionStatus === 'red' && '🔴 Precisão baixa (> 15 m)'}
-              {precisionStatus === 'gray' && '⚪ Precisão indisponível'}
+              {precisionStatus === 'green' && 'Alta (< 5m)'}
+              {precisionStatus === 'yellow' && 'Média (5-15m)'}
+              {precisionStatus === 'red' && 'Baixa (> 15m)'}
+              {precisionStatus === 'gray' && 'Indisponível'}
             </Text>
             {accuracy !== null && (
-              <Text style={styles.tooltipValue}>Atual: {accuracy.toFixed(1)} m</Text>
+              <Text style={styles.tooltipValue}>{accuracy.toFixed(1)}m</Text>
             )}
           </View>
         </TouchableOpacity>
@@ -838,14 +839,13 @@ export default function NavigateScreen() {
             <Marker
               coordinate={{ latitude: destino.lat, longitude: destino.lng }}
               title={`Ponto ${destino.numPonto}`}
-              pinColor="#4CAF50"
+              pinColor="#22c55e"
             />
           )}
-
           {polylineCoordinates.length === 2 && (
             <Polyline
               coordinates={polylineCoordinates}
-              strokeColor="#2196F3"
+              strokeColor="#3b82f6"
               strokeWidth={3}
             />
           )}
@@ -853,64 +853,37 @@ export default function NavigateScreen() {
 
         <View style={styles.fabContainer}>
           <TouchableOpacity style={styles.fab} onPress={handleCentralizar}>
-            <Text style={styles.fabText}>⊙</Text>
+            <Crosshair size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.fab, !destino && styles.fabDisabled]}
             onPress={handleEnquadrar}
             disabled={!destino}
           >
-            <Text style={[styles.fabText, !destino && styles.fabTextDisabled]}>⊡</Text>
+            <Target size={20} color={destino ? '#fff' : '#666'} />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.fab, styles.mapTypeFab]} 
-            onPress={handleToggleMapType}
-          >
-            <Text style={styles.fabText}>
-              {mapType === 'standard' ? '🛰️' : '🗺️'}
-            </Text>
+          <TouchableOpacity style={[styles.fab, styles.mapTypeFab]} onPress={handleToggleMapType}>
+            <Globe size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView style={styles.bottomPanel} contentContainerStyle={styles.bottomPanelContent}>
-        <View style={styles.progressCard}>
-        <Text style={styles.progressTitle}>Progresso da Navegação</Text>
-        {rotaConcluida ? (
-          <Text style={styles.progressMessage}>Rota concluída!</Text>
-        ) : !destino ? (
-          <Text style={styles.progressMessage}>Nenhum destino ativo.</Text>
-        ) : (
-          <View style={styles.progressData}>
-            <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>Progresso:</Text>
-              <Text style={styles.progressValue}>
-                Ponto {indiceAtual + 1} de {pontos.length}
-              </Text>
-            </View>
-            <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>Distância até o destino:</Text>
-              <Text style={styles.progressValue}>{distanciaFmt}</Text>
-            </View>
-            <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>Destino:</Text>
-              <Text style={styles.progressValueCoords}>
-                Lat {destino.lat.toFixed(8)} | Lng {destino.lng.toFixed(8)}
-              </Text>
-            </View>
+      <ScrollView style={styles.bottomPanel} contentContainerStyle={styles.bottomPanelContent} showsVerticalScrollIndicator={false}>
+        {!rotaConcluida && destino && (
+          <View style={styles.distanceCard}>
+            <Text style={styles.distanceLabel}>Distância</Text>
+            <Text style={styles.distanceValue}>{distanciaFmt}</Text>
           </View>
         )}
-      </View>
 
-        <View style={styles.compassContainer}>
-          <Text style={styles.compassTitle}>Bússola de Navegação</Text>
-
+        <View style={styles.compassCard}>
           {rotaConcluida ? (
-            <Text style={styles.compassMessage}>Rota concluída!</Text>
+            <View style={styles.completedContainer}>
+              <CheckCircle2 size={48} color="#22c55e" />
+              <Text style={styles.completedText}>Rota Concluída!</Text>
+            </View>
           ) : !destino ? (
-            <Text style={styles.compassMessage}>Rota ou posição indisponível.</Text>
-          ) : isWeb ? (
-            <Text style={styles.compassMessage}>Indisponível no navegador</Text>
+            <Text style={styles.compassMessage}>Nenhum destino ativo</Text>
           ) : (
             <>
               <View style={styles.compassCircle}>
@@ -925,27 +898,12 @@ export default function NavigateScreen() {
                   ]}
                 />
                 <View style={styles.compassRing}>
-                  {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                  {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
                     <View
                       key={deg}
-                      style={[
-                        styles.compassMark,
-                        { transform: [{ rotate: `${deg}deg` }] },
-                      ]}
+                      style={[styles.compassMark, { transform: [{ rotate: `${deg}deg` }] }]}
                     >
                       <View style={styles.compassMarkLine} />
-                      <Text style={styles.compassMarkText}>{deg}</Text>
-                    </View>
-                  ))}
-                  {[10, 20, 40, 50, 70, 80, 100, 110, 130, 140, 160, 170, 190, 200, 220, 230, 250, 260, 280, 290, 310, 320, 340, 350].map((deg) => (
-                    <View
-                      key={deg}
-                      style={[
-                        styles.compassMinorMark,
-                        { transform: [{ rotate: `${deg}deg` }] },
-                      ]}
-                    >
-                      <View style={styles.compassMinorMarkLine} />
                     </View>
                   ))}
                   <Text style={[styles.compassCardinal, styles.compassN]}>N</Text>
@@ -969,19 +927,17 @@ export default function NavigateScreen() {
                       },
                     ]}
                   >
-                    <Animated.View
-                      style={[
-                        styles.compassArrow,
-                        {
-                          borderBottomColor: pointerColor,
-                        },
-                      ]}
-                    />
+                    <Animated.View style={[styles.compassArrow, { borderBottomColor: pointerColor }]} />
                   </Animated.View>
                 )}
               </View>
 
-              <Text style={styles.alignmentFeedback}>
+              <Text style={[
+                styles.alignmentFeedback,
+                alignmentState === 'aligned' && styles.alignmentGreen,
+                alignmentState === 'adjust' && styles.alignmentYellow,
+                alignmentState === 'off' && styles.alignmentRed,
+              ]}>
                 {alignmentMessage[alignmentState]}
               </Text>
             </>
@@ -990,43 +946,39 @@ export default function NavigateScreen() {
 
         <View style={styles.navigationControls}>
           <TouchableOpacity
-            style={[styles.navButton, indiceAtual === 0 && styles.navButtonDisabled]}
+            style={[styles.navButton, styles.navButtonSecondary, indiceAtual === 0 && styles.navButtonDisabled]}
             onPress={handleVoltarPonto}
             disabled={indiceAtual === 0}
           >
-            <Text style={[styles.navButtonText, indiceAtual === 0 && styles.buttonDisabled]}>
-              ⬅ Voltar
-            </Text>
+            <ArrowLeft size={18} color={indiceAtual === 0 ? '#666' : '#fff'} />
+            <Text style={[styles.navButtonText, indiceAtual === 0 && styles.navButtonTextDisabled]}>Voltar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.navButton,
+              styles.navButtonPrimary,
               insideRadius && indiceAtual < pontos.length - 1 && styles.navButtonHighlighted,
               indiceAtual >= pontos.length - 1 && styles.navButtonDisabled,
             ]}
             onPress={handleProximoPonto}
             disabled={indiceAtual >= pontos.length - 1}
           >
-            <Text
-              style={[
-                styles.navButtonText,
-                indiceAtual >= pontos.length - 1 && styles.buttonDisabled,
-              ]}
-            >
-              Próximo ➡
+            <Text style={[styles.navButtonText, indiceAtual >= pontos.length - 1 && styles.navButtonTextDisabled]}>
+              Próximo
             </Text>
+            <Play size={16} color={indiceAtual >= pontos.length - 1 ? '#666' : '#fff'} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.resetButton} onPress={handleZerarRota}>
-            <Text style={styles.resetButtonText}>🔁 Zerar</Text>
+          <TouchableOpacity style={[styles.navButton, styles.navButtonDanger]} onPress={handleZerarRota}>
+            <RotateCcw size={18} color="#fff" />
+            <Text style={styles.navButtonText}>Zerar</Text>
           </TouchableOpacity>
         </View>
 
         {__DEV__ && (
           <View style={styles.diagnosticsCard}>
-            <Text style={styles.diagnosticsTitle}>🔧 Diagnóstico (dev-only)</Text>
-
+            <Text style={styles.diagnosticsTitle}>Diagnóstico (dev-only)</Text>
             <View style={styles.diagnosticsGrid}>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Plataforma:</Text>
@@ -1045,39 +997,27 @@ export default function NavigateScreen() {
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Speed:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {speed !== null ? `${speed.toFixed(2)} m/s` : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{speed !== null ? `${speed.toFixed(2)} m/s` : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Course:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {course !== null && course >= 0 ? `${course.toFixed(1)}°` : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{course !== null && course >= 0 ? `${course.toFixed(1)}°` : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Heading:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {heading !== null ? `${heading.toFixed(1)}°` : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{heading !== null ? `${heading.toFixed(1)}°` : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Bearing:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {bearing !== null ? `${bearing.toFixed(1)}°` : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{bearing !== null ? `${bearing.toFixed(1)}°` : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Delta:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {deltaSuavizado !== null ? `${deltaSuavizado.toFixed(1)}°` : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{deltaSuavizado !== null ? `${deltaSuavizado.toFixed(1)}°` : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Distância:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {distanciaM !== null ? formatDistance(distanciaM) : '—'}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{distanciaM !== null ? formatDistance(distanciaM) : '—'}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Inside raio:</Text>
@@ -1085,16 +1025,13 @@ export default function NavigateScreen() {
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Ponto atual:</Text>
-                <Text style={styles.diagnosticsValue}>
-                  {indiceAtual + 1} de {pontos.length}
-                </Text>
+                <Text style={styles.diagnosticsValue}>{indiceAtual + 1} de {pontos.length}</Text>
               </View>
               <View style={styles.diagnosticsRow}>
                 <Text style={styles.diagnosticsLabel}>Alignment:</Text>
                 <Text style={styles.diagnosticsValue}>{alignmentState}</Text>
               </View>
             </View>
-
             <View style={styles.diagnosticsActions}>
               <TouchableOpacity style={styles.diagnosticsButton} onPress={handleCentralizar}>
                 <Text style={styles.diagnosticsButtonText}>Center</Text>
@@ -1104,9 +1041,7 @@ export default function NavigateScreen() {
                 onPress={handleEnquadrar}
                 disabled={!destino}
               >
-                <Text style={[styles.diagnosticsButtonText, !destino && styles.buttonDisabled]}>
-                  Fit
-                </Text>
+                <Text style={[styles.diagnosticsButtonText, !destino && styles.buttonDisabled]}>Fit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.diagnosticsButton} onPress={handleLogDiagnostics}>
                 <Text style={styles.diagnosticsButtonText}>Log</Text>
@@ -1114,12 +1049,6 @@ export default function NavigateScreen() {
             </View>
           </View>
         )}
-
-        <View style={styles.footer}>
-          <Text style={styles.coordsText}>
-            Lat: {posAtual.lat.toFixed(8)} | Lng: {posAtual.lng.toFixed(8)}
-          </Text>
-        </View>
       </ScrollView>
 
       {showCollectionModal && (
@@ -1160,133 +1089,227 @@ export default function NavigateScreen() {
           </View>
         </View>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0E0E0E',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#a1a1aa',
+    textAlign: 'center',
   },
   header: {
-    paddingTop: 48,
+    paddingTop: 52,
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: '#141414',
-    borderBottomWidth: 1,
-    borderBottomColor: '#242424',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  badgeContainer: {
+  headerTop: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  precisionIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusRow: {
+    flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
   },
-  badge: {
-    backgroundColor: '#1E1E1E',
-    paddingHorizontal: 12,
+  statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2ecc71',
+    borderRadius: 20,
+    gap: 6,
   },
-  badgeText: {
+  statusChipText: {
     fontSize: 11,
-    color: '#FFFFFF',
+    color: '#d4d4d8',
     fontWeight: '600',
   },
-  modeBadge: {
-    borderColor: '#4DA3FF',
-  },
-  collectedBadge: {
-    borderColor: '#f1c40f',
-  },
   mapZone: {
-    height: 280,
-    marginHorizontal: 20,
-    marginTop: 16,
-    backgroundColor: '#000',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#888888',
+    height: 240,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
   },
   map: {
     flex: 1,
-    borderRadius: 10,
   },
   fabContainer: {
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: 10,
+    right: 10,
     gap: 8,
   },
   fab: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#2196F3',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   fabDisabled: {
-    backgroundColor: '#2E2E2E',
-  },
-  fabText: {
-    fontSize: 24,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  fabTextDisabled: {
-    color: '#666',
+    backgroundColor: 'rgba(30, 30, 30, 0.8)',
   },
   mapTypeFab: {
-    backgroundColor: '#FF9500',
+    backgroundColor: 'rgba(245, 158, 11, 0.9)',
   },
   bottomPanel: {
     flex: 1,
-    backgroundColor: '#121212',
   },
   bottomPanelContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+    padding: 16,
+    paddingBottom: 32,
   },
-  footer: {
-    backgroundColor: '#141414',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#242424',
+  distanceCard: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
   },
-  coordsText: {
-    fontSize: 11,
+  distanceLabel: {
+    fontSize: 12,
+    color: '#86efac',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  distanceValue: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#22c55e',
+  },
+  compassCard: {
+    backgroundColor: 'rgba(30, 30, 40, 0.6)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  completedContainer: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 12,
+  },
+  completedText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#22c55e',
+  },
+  compassMessage: {
+    fontSize: 14,
+    color: '#71717a',
+    textAlign: 'center',
+    paddingVertical: 32,
+  },
+  alignmentFeedback: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 16,
+    color: '#a1a1aa',
+  },
+  alignmentGreen: {
+    color: '#22c55e',
+  },
+  alignmentYellow: {
+    color: '#f59e0b',
+  },
+  alignmentRed: {
+    color: '#ef4444',
+  },
+  navigationControls: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  navButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 14,
+    gap: 6,
+  },
+  navButtonSecondary: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  navButtonPrimary: {
+    backgroundColor: '#22c55e',
+  },
+  navButtonDanger: {
+    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+  },
+  navButtonHighlighted: {
+    backgroundColor: '#16a34a',
+    shadowColor: '#22c55e',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  navButtonDisabled: {
+    backgroundColor: 'rgba(30, 30, 30, 0.5)',
+  },
+  navButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  navButtonTextDisabled: {
     color: '#666',
-    textAlign: 'center',
-    fontFamily: 'monospace',
-    opacity: 0.8,
-  },
-  statusText: {
-    fontSize: 16,
-    color: '#B0B0B0',
-    textAlign: 'center',
   },
   errorText: {
     fontSize: 16,
-    color: '#F44336',
+    color: '#ef4444',
     textAlign: 'center',
+    marginTop: 8,
   },
   webGradient: {
     flex: 1,
