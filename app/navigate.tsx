@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Platform, Alert, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, Platform, Alert, TouchableOpacity, ScrollView, Animated, ActivityIndicator, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/lib/store';
 import { bearingBetween, deltaHeading, haversineMeters, formatDistance } from '@/lib/geo';
 import * as Location from 'expo-location';
 import * as Haptics from 'expo-haptics';
 import MapView, { Marker, Polyline, Region } from '@/lib/MapView';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Navigation, MapPin, Compass, Target, CheckCircle2, XCircle, ArrowRight, RotateCcw, Crosshair, Signal, Smartphone, Globe, ChevronRight, Loader2, ArrowLeft, Play } from 'lucide-react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type GpsStatus = 'aguardando' | 'permitido' | 'negado';
 type PrecisionStatus = 'green' | 'yellow' | 'red' | 'gray';
@@ -56,7 +60,19 @@ export default function NavigateScreen() {
   const pointerColorAnim = useRef(new Animated.Value(0)).current;
   const ringOpacityAnim = useRef(new Animated.Value(0)).current;
 
+  const webFadeAnim = useRef(new Animated.Value(0)).current;
+  const webSlideAnim = useRef(new Animated.Value(20)).current;
+
   const isWeb = Platform.OS === 'web';
+
+  useEffect(() => {
+    if (isWeb) {
+      Animated.parallel([
+        Animated.timing(webFadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(webSlideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [isWeb]);
 
   const updatePrecisionStatus = (newAccuracy: number | null) => {
     if (precisionDebounceRef.current) {
@@ -561,55 +577,130 @@ export default function NavigateScreen() {
 
   if (isWeb) {
     return (
-      <View style={styles.container}>
-        <View style={styles.webHeader}>
-          <Text style={styles.title}>Navegação GPS</Text>
-          {pontos.length > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Rota: {pontos.length} pontos</Text>
+      <LinearGradient colors={['#0a0a0f', '#121218', '#1a1a24']} style={styles.webGradient}>
+        <ScrollView style={styles.webScrollView} contentContainerStyle={styles.webScrollContent} showsVerticalScrollIndicator={false}>
+          <Animated.View style={[styles.webContainer, { opacity: webFadeAnim, transform: [{ translateY: webSlideAnim }] }]}>
+            <View style={styles.webHeaderSection}>
+              <LinearGradient colors={['#3b82f6', '#2563eb']} style={styles.webHeaderIcon}>
+                <Navigation size={28} color="#fff" strokeWidth={2.5} />
+              </LinearGradient>
+              <Text style={styles.webTitle}>Navegação GPS</Text>
+              <Text style={styles.webSubtitle}>Versão Web Preview</Text>
+              {pontos.length > 0 && (
+                <View style={styles.webRouteBadge}>
+                  <MapPin size={14} color="#22c55e" />
+                  <Text style={styles.webRouteBadgeText}>{pontos.length} pontos na rota</Text>
+                </View>
+              )}
             </View>
-          )}
-        </View>
 
-        <View style={styles.webContent}>
-          <View style={styles.webCard}>
-            <Text style={styles.webCardTitle}>Mapa indisponível no Web</Text>
-            <Text style={styles.webCardText}>
-              O mapa nativo está disponível no mobile (Expo Go). No navegador, apenas as
-              coordenadas de localização são exibidas.
-            </Text>
-          </View>
+            <View style={styles.webInfoCard}>
+              <View style={styles.webInfoCardHeader}>
+                <View style={styles.webInfoIconWrapper}>
+                  <Smartphone size={18} color="#f59e0b" />
+                </View>
+                <Text style={styles.webInfoCardTitle}>Use no Mobile</Text>
+              </View>
+              <Text style={styles.webInfoCardText}>
+                Para navegação completa com mapa e bússola, use o app no celular através do Expo Go.
+              </Text>
+              <View style={styles.webInfoCardFeatures}>
+                <View style={styles.webFeatureItem}>
+                  <CheckCircle2 size={14} color="#22c55e" />
+                  <Text style={styles.webFeatureText}>Mapa interativo</Text>
+                </View>
+                <View style={styles.webFeatureItem}>
+                  <CheckCircle2 size={14} color="#22c55e" />
+                  <Text style={styles.webFeatureText}>Bússola digital</Text>
+                </View>
+                <View style={styles.webFeatureItem}>
+                  <CheckCircle2 size={14} color="#22c55e" />
+                  <Text style={styles.webFeatureText}>GPS de alta precisão</Text>
+                </View>
+              </View>
+            </View>
 
-          <View style={styles.webPositionCard}>
-            <Text style={styles.webPositionTitle}>Sua posição (Web)</Text>
-            {gpsStatus === 'aguardando' && (
-              <Text style={styles.webPositionWaiting}>Aguardando posição…</Text>
-            )}
-            {gpsStatus === 'negado' && (
-              <View>
-                <Text style={styles.webPositionError}>
-                  Permissão negada ou indisponível no navegador.
-                </Text>
-                <Text style={styles.webPositionErrorHint}>
-                  Tente novamente e verifique permissões de localização do site.
-                </Text>
+            <View style={styles.webLocationCard}>
+              <View style={styles.webLocationCardHeader}>
+                <View style={[styles.webInfoIconWrapper, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
+                  <Crosshair size={18} color="#22c55e" />
+                </View>
+                <Text style={styles.webLocationCardTitle}>Sua Localização</Text>
+                <View style={[styles.webStatusDot, gpsStatus === 'permitido' ? styles.webStatusDotActive : gpsStatus === 'aguardando' ? styles.webStatusDotWaiting : styles.webStatusDotError]} />
+              </View>
+
+              {gpsStatus === 'aguardando' && (
+                <View style={styles.webLocationLoading}>
+                  <ActivityIndicator size="small" color="#3b82f6" />
+                  <Text style={styles.webLocationLoadingText}>Obtendo localização...</Text>
+                </View>
+              )}
+
+              {gpsStatus === 'negado' && (
+                <View style={styles.webLocationError}>
+                  <XCircle size={20} color="#ef4444" />
+                  <Text style={styles.webLocationErrorText}>Permissão de localização negada</Text>
+                  <Text style={styles.webLocationErrorHint}>Habilite a localização nas configurações do navegador</Text>
+                </View>
+              )}
+
+              {gpsStatus === 'permitido' && posAtual && (
+                <View style={styles.webLocationData}>
+                  <View style={styles.webLocationRow}>
+                    <Text style={styles.webLocationLabel}>Latitude</Text>
+                    <Text style={styles.webLocationValue}>{posAtual.lat.toFixed(6)}°</Text>
+                  </View>
+                  <View style={styles.webLocationDivider} />
+                  <View style={styles.webLocationRow}>
+                    <Text style={styles.webLocationLabel}>Longitude</Text>
+                    <Text style={styles.webLocationValue}>{posAtual.lng.toFixed(6)}°</Text>
+                  </View>
+                  {destino && (
+                    <>
+                      <View style={styles.webLocationDivider} />
+                      <View style={styles.webLocationRow}>
+                        <Text style={styles.webLocationLabel}>Distância ao Próx.</Text>
+                        <Text style={[styles.webLocationValue, { color: '#22c55e' }]}>{distanciaFmt}</Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+              )}
+            </View>
+
+            {destino && (
+              <View style={styles.webDestinationCard}>
+                <View style={styles.webDestinationHeader}>
+                  <View style={[styles.webInfoIconWrapper, { backgroundColor: 'rgba(167, 139, 250, 0.15)' }]}>
+                    <Target size={18} color="#a78bfa" />
+                  </View>
+                  <View style={styles.webDestinationHeaderText}>
+                    <Text style={styles.webDestinationTitle}>Destino Atual</Text>
+                    <Text style={styles.webDestinationSubtitle}>Ponto {indiceAtual + 1} de {pontos.length}</Text>
+                  </View>
+                </View>
+                <View style={styles.webDestinationCoords}>
+                  <Text style={styles.webDestinationCoordsText}>
+                    {destino.lat.toFixed(6)}°, {destino.lng.toFixed(6)}°
+                  </Text>
+                </View>
               </View>
             )}
-            {gpsStatus === 'permitido' && posAtual && (
-              <View>
-                <Text style={styles.webPositionCoords}>
-                  Lat: {posAtual.lat.toFixed(8)} | Lng: {posAtual.lng.toFixed(8)}
-                </Text>
-              </View>
-            )}
-          </View>
 
-          <View style={styles.webPositionCard}>
-            <Text style={styles.webPositionTitle}>Bússola (Web)</Text>
-            <Text style={styles.webHeadingText}>Direção híbrida indisponível no Web</Text>
-          </View>
-        </View>
-      </View>
+            <View style={styles.webButtonsRow}>
+              <TouchableOpacity style={styles.webBackButton} onPress={() => router.replace('/')}>
+                <ArrowLeft size={18} color="#fff" />
+                <Text style={styles.webBackButtonText}>Voltar</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.webFooter}>
+              <Globe size={14} color="#52525b" />
+              <Text style={styles.webFooterText}>Preview Web - Funcionalidades limitadas</Text>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 
@@ -1196,6 +1287,274 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#F44336',
     textAlign: 'center',
+  },
+  webGradient: {
+    flex: 1,
+  },
+  webScrollView: {
+    flex: 1,
+  },
+  webScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+  webContainer: {
+    flex: 1,
+    padding: 24,
+  },
+  webHeaderSection: {
+    alignItems: 'center',
+    marginBottom: 28,
+    marginTop: 16,
+  },
+  webHeaderIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  webTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+  },
+  webSubtitle: {
+    fontSize: 14,
+    color: '#71717a',
+    marginTop: 6,
+    letterSpacing: 0.3,
+  },
+  webRouteBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 16,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.2)',
+  },
+  webRouteBadgeText: {
+    fontSize: 13,
+    color: '#22c55e',
+    fontWeight: '600',
+  },
+  webInfoCard: {
+    backgroundColor: 'rgba(30, 30, 40, 0.8)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+  },
+  webInfoCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  webInfoIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  webInfoCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  webInfoCardText: {
+    fontSize: 14,
+    color: '#a1a1aa',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  webInfoCardFeatures: {
+    gap: 10,
+  },
+  webFeatureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  webFeatureText: {
+    fontSize: 13,
+    color: '#d4d4d8',
+  },
+  webLocationCard: {
+    backgroundColor: 'rgba(30, 30, 40, 0.8)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.2)',
+  },
+  webLocationCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  webLocationCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    flex: 1,
+    marginLeft: 12,
+  },
+  webStatusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  webStatusDotActive: {
+    backgroundColor: '#22c55e',
+    shadowColor: '#22c55e',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+  },
+  webStatusDotWaiting: {
+    backgroundColor: '#f59e0b',
+  },
+  webStatusDotError: {
+    backgroundColor: '#ef4444',
+  },
+  webLocationLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  webLocationLoadingText: {
+    fontSize: 14,
+    color: '#a1a1aa',
+  },
+  webLocationError: {
+    alignItems: 'center',
+    padding: 16,
+    gap: 8,
+  },
+  webLocationErrorText: {
+    fontSize: 14,
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  webLocationErrorHint: {
+    fontSize: 12,
+    color: '#71717a',
+    textAlign: 'center',
+  },
+  webLocationData: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 12,
+    padding: 16,
+  },
+  webLocationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  webLocationLabel: {
+    fontSize: 14,
+    color: '#a1a1aa',
+  },
+  webLocationValue: {
+    fontSize: 15,
+    color: '#3b82f6',
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  webLocationDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    marginVertical: 4,
+  },
+  webDestinationCard: {
+    backgroundColor: 'rgba(30, 30, 40, 0.8)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.2)',
+  },
+  webDestinationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  webDestinationHeaderText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  webDestinationTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  webDestinationSubtitle: {
+    fontSize: 12,
+    color: '#a78bfa',
+    marginTop: 2,
+  },
+  webDestinationCoords: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 10,
+    padding: 12,
+    alignItems: 'center',
+  },
+  webDestinationCoordsText: {
+    fontSize: 14,
+    color: '#a78bfa',
+    fontFamily: 'monospace',
+    fontWeight: '500',
+  },
+  webButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  webBackButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    gap: 8,
+  },
+  webBackButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
+  webFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+  },
+  webFooterText: {
+    fontSize: 12,
+    color: '#52525b',
   },
   webHeader: {
     paddingTop: 48,
