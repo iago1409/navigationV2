@@ -2,11 +2,89 @@ import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Activi
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/lib/store';
 import { validateAndNormalizeRoute } from '@/lib/validation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapPin, Navigation, CheckCircle2, AlertCircle, FileJson, Sparkles, ChevronRight, Info } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+
+const NUM_PARTICLES = 15;
+
+function Particle({ delay, startX }: { delay: number; startX: number }) {
+  const translateY = useRef(new Animated.Value(height + 50)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      translateY.setValue(height + 50);
+      opacity.setValue(0);
+
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(translateY, {
+            toValue: -50,
+            duration: 4000 + Math.random() * 3000,
+            useNativeDriver: true,
+          }),
+          Animated.sequence([
+            Animated.timing(opacity, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.8,
+              duration: 3500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]),
+        ]),
+      ]).start(() => animate());
+    };
+    animate();
+  }, []);
+
+  const size = 2 + Math.random() * 3;
+
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        left: startX,
+        width: size,
+        height: size * 12,
+        borderRadius: size,
+        backgroundColor: '#22c55e',
+        opacity,
+        transform: [{ translateY }],
+      }}
+    />
+  );
+}
+
+function ParticlesBackground() {
+  const particles = useMemo(() => {
+    return Array.from({ length: NUM_PARTICLES }, (_, i) => ({
+      id: i,
+      delay: Math.random() * 3000,
+      startX: Math.random() * width,
+    }));
+  }, []);
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {particles.map((p) => (
+        <Particle key={p.id} delay={p.delay} startX={p.startX} />
+      ))}
+    </View>
+  );
+}
 
 export default function ImportScreen() {
   const router = useRouter();
@@ -121,10 +199,11 @@ export default function ImportScreen() {
 
   return (
     <LinearGradient
-      colors={['#0a0a0f', '#121218', '#1a1a24']}
+      colors={['#0a0a0f', '#0d0d12', '#111116']}
       style={styles.gradient}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ParticlesBackground />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.headerSection}>
             <Animated.View style={[styles.iconContainer, { transform: [{ scale: pulseAnim }] }]}>

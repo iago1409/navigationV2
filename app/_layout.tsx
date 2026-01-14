@@ -9,7 +9,7 @@ export default function RootLayout() {
   return (
     <>
       <Stack>
-        <Stack.Screen name="index" options={{ title: 'Importar Rota' }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="navigate" options={{ title: 'Navegação GPS' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
